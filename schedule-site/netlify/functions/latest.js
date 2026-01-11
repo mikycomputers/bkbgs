@@ -1,17 +1,19 @@
 export default async () => {
   const { getStore } = await import("@netlify/blobs");
   const store = getStore("schedule");
-  const data = await store.get("latest.jpg", { type: "arrayBuffer" });
 
-  if (!data) {
+  const result = await store.get("latest.png", { type: "arrayBuffer", metadata: true });
+
+  if (!result || !result.data) {
     return new Response("No image yet", { status: 404 });
   }
 
-  return new Response(data, {
+  return new Response(result.data, {
     status: 200,
     headers: {
-      "Content-Type": "image/jpeg",
-      "Cache-Control": "no-store"
+      "Content-Type": "image/png",
+      "Cache-Control": "no-store",
+      "X-Updated-At": result.metadata?.uploadedAt || ""
     }
   });
 };

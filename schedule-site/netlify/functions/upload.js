@@ -13,7 +13,8 @@ export default async (req) => {
 
   const { getStore } = await import("@netlify/blobs");
   const store = getStore("schedule");
-  await store.set("latest.jpg", bytes, {
+
+  await store.set("latest.png", bytes, {
     metadata: { uploadedAt: new Date().toISOString() }
   });
 

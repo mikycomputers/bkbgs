@@ -1,6 +1,4 @@
 {
-  "name": "schedule-board",
-  "private": true,
   "dependencies": {
     "@netlify/blobs": "^7.0.0"
   }

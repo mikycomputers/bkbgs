@@ -1,22 +1,78 @@
 <!doctype html>
 <html lang="he">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>לוח זמנים</title>
-  <style>
-    html, body { margin:0; padding:0; width:100%; height:100%; background:#000; overflow:hidden; }
-    img { width:100vw; height:100vh; object-fit:contain; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>לוח זמנים</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  overflow: hidden;
+}
+
+#container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: auto;
+}
+
+#updated {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+}
+</style>
 </head>
+
 <body>
-  <img id="board" alt="לוח זמנים" />
-  <script>
-    function refresh() {
-      document.getElementById('board').src = '/.netlify/functions/latest?v=' + Date.now();
-    }
-    refresh();
-    setInterval(refresh, 5 * 60 * 1000); // רענון כל 5 דקות למקרה שהדף פתוח שעות
-  </script>
+<div id="container">
+  <img id="board" />
+  <div id="updated">טוען…</div>
+</div>
+
+<script>
+async function refresh() {
+  const img = document.getElementById("board");
+  const label = document.getElementById("updated");
+
+  const url = "/.netlify/functions/latest?v=" + Date.now();
+  const res = await fetch(url);
+
+  if (!res.ok) return;
+
+  const updatedAt = res.headers.get("X-Updated-At");
+  img.src = url;
+
+  if (updatedAt) {
+    const d = new Date(updatedAt);
+    label.textContent =
+      "עודכן לאחרונה: " +
+      d.toLocaleDateString("he-IL") +
+      " " +
+      d.toLocaleTimeString("he-IL", { hour: '2-digit', minute: '2-digit' });
+  }
+}
+
+refresh();
+setInterval(refresh, 5 * 60 * 1000);
+</script>
 </body>
 </html>

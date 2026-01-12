@@ -67,6 +67,15 @@
     line-height: 1.3;
   }
 
+  /* כשמסובבים לרוחב – מעבירים את הטקסט לפינה הנגדית */
+body.rotated #updated {
+  left: auto;
+  bottom: auto;
+
+  right: calc(10px + env(safe-area-inset-right, 0px));
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  }
+
   /* כפתור סיבוב – גדול וברור + מיקום סביב 80% למטה */
   #rotateBtn {
     position: fixed;
@@ -166,6 +175,7 @@
 </script>
 </body>
 </html>
+
 
 
 

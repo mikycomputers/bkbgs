@@ -23,7 +23,7 @@
     overflow: hidden;
   }
 
-  /* "במה" שמרכזת את התצוגה תמיד */
+  /* במה שמרכזת את התצוגה */
   #stage {
     position: absolute;
     left: 50%;
@@ -34,28 +34,26 @@
     transform-origin: center center;
   }
 
-  /* התמונה תמיד ממלאת את הבמה */
   #board {
     width: 100%;
     height: 100%;
     object-fit: contain;
     display: block;
-    image-rendering: auto;
   }
 
-  /* מצב סיבוב: מסובבים את הבמה ומחליפים ממדים */
+  /* סיבוב תקין */
   body.rotated #stage {
     width: 100vh;
     height: 100vw;
     transform: translate(-50%, -50%) rotate(90deg);
   }
 
-  /* overlay: טקסט עדכון */
+  /* טקסט הסבר */
   #updated {
     position: fixed;
     left: calc(10px + env(safe-area-inset-left, 0px));
     bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-    background: rgba(0,0,0,0.40);
+    background: rgba(0,0,0,0.35);
     color: rgba(255,255,255,0.7);
     font-size: 13px;
     padding: 8px 12px;
@@ -67,30 +65,28 @@
     line-height: 1.3;
   }
 
-  /* כשמסובבים לרוחב – מעבירים את הטקסט לפינה הנגדית */
-body.rotated #updated {
-  left: auto;
-  bottom: auto;
-
-  right: calc(10px + env(safe-area-inset-right, 0px));
-  top: calc(10px + env(safe-area-inset-top, 0px));
+  /* כשהמסך מסובב – להעביר לצד הנגדי */
+  body.rotated #updated {
+    left: auto;
+    bottom: auto;
+    right: calc(10px + env(safe-area-inset-right, 0px));
+    top: calc(10px + env(safe-area-inset-top, 0px));
   }
 
-  /* כפתור סיבוב – גדול וברור + מיקום סביב 80% למטה */
+  /* כפתור סיבוב – חץ לבן בלבד */
   #rotateBtn {
     position: fixed;
-    right: calc(26px + env(safe-area-inset-right, 0px));
-    top: calc(75vh + env(safe-area-inset-top, 0px));
+    right: calc(14px + env(safe-area-inset-right, 0px));
+    top: calc(80vh + env(safe-area-inset-top, 0px));
     z-index: 999999;
 
-    width: 36px;
-    height: 36px;
+    width: 48px;
+    height: 48px;
     border: 0;
     background: transparent;
     color: #ffffff;
-
-    font-size: 48px;
-    line-height: 82px;
+    font-size: 36px;
+    line-height: 48px;
     text-align: center;
 
     cursor: pointer;
@@ -98,17 +94,35 @@ body.rotated #updated {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* להסתיר את כפתור הסיבוב במסכים רחבים (מחשב) */
-  @media (min-width: 768px) {
-    #rotateBtn { display: none; }
+  /* כפתור הוספה למסך הבית */
+  #installBtn {
+    position: fixed;
+    right: calc(14px + env(safe-area-inset-right, 0px));
+    top: calc(72vh + env(safe-area-inset-top, 0px));
+    z-index: 999999;
+
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: #ffffff;
+    font-size: 26px;
+    line-height: 44px;
+    text-align: center;
+
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    display: none;
   }
 
-  @media (max-width: 767px) {
-  html, body {
-    overflow: auto; /* מאפשר לדפדפן זום/גלילה טבעיים */
+  /* להסתיר במחשב ובמצב שוכב */
+  @media (min-width: 768px), (orientation: landscape) {
+    #rotateBtn,
+    #installBtn {
+      display: none;
+    }
   }
-}
-
 </style>
 </head>
 
@@ -119,7 +133,8 @@ body.rotated #updated {
     </div>
   </div>
 
-  <button id="rotateBtn" type="button" aria-label="היפוך תצוגה">⟳</button>
+  <button id="rotateBtn" aria-label="היפוך תצוגה">⟳</button>
+  <button id="installBtn" aria-label="הוסף למסך הבית">＋</button>
 
   <div id="updated">
     שימו לב: זו אינה תצוגה בלייב אלא צילום המתעדכן כל כמה שעות. עדכון אחרון: טוען…
@@ -129,6 +144,7 @@ body.rotated #updated {
   const img = document.getElementById("board");
   const label = document.getElementById("updated");
   const rotateBtn = document.getElementById("rotateBtn");
+  const installBtn = document.getElementById("installBtn");
 
   rotateBtn.addEventListener("click", () => {
     document.body.classList.toggle("rotated");
@@ -142,48 +158,35 @@ body.rotated #updated {
     );
   }
 
-  async function getUpdatedHeader(url) {
-    try {
-      const r = await fetch(url, { method: "HEAD", cache: "no-store" });
-      if (r.ok) return r.headers.get("X-Updated-At");
-    } catch (e) {}
-
-    try {
-      const r = await fetch(url, { method: "GET", cache: "no-store" });
-      if (r.ok) return r.headers.get("X-Updated-At");
-    } catch (e) {}
-
-    return null;
-  }
-
-  function setLabelWithDate(d) {
-    label.textContent =
-      "שימו לב: זו אינה תצוגה בלייב אלא צילום המתעדכן כל כמה שעות. עדכון אחרון: " +
-      formatHe(d);
-  }
-
   async function refresh() {
     const url = "/.netlify/functions/latest?v=" + Date.now();
     img.src = url;
-
-    const updatedAt = await getUpdatedHeader(url);
-    if (updatedAt) {
-      const d = new Date(updatedAt);
-      if (!isNaN(d.getTime())) {
-        setLabelWithDate(d);
-        return;
-      }
-    }
-    setLabelWithDate(new Date());
+    label.textContent =
+      "שימו לב: זו אינה תצוגה בלייב אלא צילום המתעדכן כל כמה שעות. עדכון אחרון: " +
+      formatHe(new Date());
   }
 
   refresh();
   setInterval(refresh, 5 * 60 * 1000);
+
+  /* הוספה למסך הבית – אנדרואיד */
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = "block";
+  });
+
+  installBtn.addEventListener("click", async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = "none";
+    } else {
+      alert("באייפון:\nשתף → הוסף למסך הבית");
+    }
+  });
 </script>
 </body>
 </html>
-
-
-
-
-

@@ -242,10 +242,13 @@
       await deferredPrompt.userChoice;
       deferredPrompt = null;
       installBtn.style.display = "none";
-    } else {
-      alert("באייפון:\nשתף → הוסף למסך הבית");
-    }
-  });
+  } else {
+    alert(
+      "באנדרואיד (Chrome):\nלחץ על ⋮ (תפריט)\nואז 'הוסף למסך הבית' / 'התקן אפליקציה'"
+    );  
+  }
+});
 </script>
 </body>
 </html>
+

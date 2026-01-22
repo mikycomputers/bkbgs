@@ -6,11 +6,79 @@
   <title>Schedule Board</title>
   <style>
     html, body { margin: 0; height: 100%; background: #111; }
+
+    /* הבמה כדי לאפשר סיבוב */
+    #stage {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100vw;
+      height: 100vh;
+      transform: translate(-50%, -50%);
+      transform-origin: center center;
+    }
+
     img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+    /* מצב סיבוב */
+    body.rotated #stage {
+      width: 100vh;
+      height: 100vw;
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+
+    /* overlay: טקסט עדכון */
+    #updated {
+      position: fixed;
+      left: calc(10px + env(safe-area-inset-left, 0px));
+      bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      background: rgba(0,0,0,0.40);
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-family: Arial, sans-serif;
+      z-index: 999999;
+      pointer-events: none;
+      max-width: 92vw;
+      line-height: 1.3;
+    }
+
+    /* כשמסובבים – מעבירים לפינה הנגדית */
+    body.rotated #updated {
+      left: auto;
+      bottom: auto;
+      right: calc(10px + env(safe-area-inset-right, 0px));
+      top: calc(10px + env(safe-area-inset-top, 0px));
+    }
+
+    /* כפתור סיבוב */
+    #rotateBtn {
+      position: fixed;
+      right: calc(26px + env(safe-area-inset-right, 0px));
+      top: calc(75vh + env(safe-area-inset-top, 0px));
+      z-index: 999999;
+
+      width: 36px;
+      height: 36px;
+      border: 0;
+      background: transparent;
+      color: #ffffff;
+
+      font-size: 48px;
+      line-height: 82px;
+      text-align: center;
+
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* להסתיר במחשב */
+    @media (min-width: 768px) {
+      #rotateBtn { display: none; }
+    }
   </style>
 </head>
 <body>
-  <img id="shot" src="/latest.png" alt="Latest screenshot" />
-</body>
-</html>
-
+  <div id="s
